@@ -1,5 +1,6 @@
 name: 🚀 Deploy Simple Node App to Azure VM
 
+
 on:
   push:
     branches: [main, master]
@@ -79,7 +80,7 @@ jobs:
             pm2 delete simple-app 2>/dev/null || true
             
             # Start new process
-            pm2 start app.js --name "simple-app" -- --port 3000
+            pm2 start app.js --name "simple-app" -- --port 80
             pm2 save
             
             echo "✅ Deployment completed!"
@@ -100,7 +101,7 @@ jobs:
       - name: Check application health
         run: |
           for i in {1..30}; do
-            if curl -f http://${{ secrets.AZURE_VM_IP }}:3000/health &>/dev/null; then
+            if curl -f http://${{ secrets.AZURE_VM_IP }}/health &>/dev/null; then
               echo "✅ Application is healthy!"
               exit 0
             fi
@@ -124,8 +125,8 @@ jobs:
         run: |
           if [ "${{ needs.deploy.result }}" = "success" ] && [ "${{ needs.health-check.result }}" = "success" ]; then
             echo "✅ DEPLOYMENT SUCCESSFUL"
-            echo "🌍 URL: http://${{ secrets.AZURE_VM_IP }}:3000"
-            echo "🏥 Health: http://${{ secrets.AZURE_VM_IP }}:3000/health"
+            echo "🌍 URL: http://${{ secrets.AZURE_VM_IP }}"
+            echo "🏥 Health: http://${{ secrets.AZURE_VM_IP }}/health"
           else
             echo "❌ DEPLOYMENT FAILED"
           fi
