@@ -1,7 +1,7 @@
 name: 🚀 Deploy Simple Node App to Azure VM
 
 
-on:
+on: 
   push:
     branches: [main, master]
   pull_request:
