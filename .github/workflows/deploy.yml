@@ -61,10 +61,7 @@ jobs:
             mkdir -p ~/simple-node-app
             cd ~/simple-node-app
             
-            # Backup current version
-            if [ -f "app.js" ]; then
-              cp -r . backup_$(date +%s)
-            fi
+          
             
             # Pull latest code
             if [ -d ".git" ]; then
