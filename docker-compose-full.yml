@@ -1,0 +1,68 @@
+version: '3.9'
+
+services:
+  ################################
+  # JFrog Artifactory (Docker Registry)
+  ################################
+  artifactory:
+    image: releases-docker.jfrog.io/jfrog/artifactory-oss:latest
+    container_name: jfrog-artifactory
+    ports:
+      - "8081:8081"          # Web UI & REST API
+      - "8082:8082"          # Docker registry (pull/push)
+    environment:
+      - JF_SHARED_NODE_IP=artifactory
+      - JF_SHARED_NODE_ID=artifactory-node
+    volumes:
+      - artifactory-data:/var/opt/jfrog/artifactory
+      - artifactory-logs:/opt/jfrog/artifactory/var/log
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/artifactory/api/system/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  ################################
+  # Your Simple Node App
+  ################################
+  app:
+    build: .
+    container_name: simple-node-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - REGISTRY_URL=http://artifactory:8082  # JFrog registry
+    depends_on:
+      artifactory:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ################################
+  # Optional: Registry UI (easier browsing)
+  ################################
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    container_name: jfrog-ui
+    ports:
+      - "8080:80"
+    environment:
+      - REGISTRY_TITLE=JFrog Docker Registry
+      - REGISTRY_URL=http://artifactory:8082
+    depends_on:
+      - artifactory
+    restart: unless-stopped
+
+volumes:
+  artifactory-data:
+    driver: local
+  artifactory-logs:
+    driver: local
+
+networks:
+  default:
+    name: simple-app-network
+    driver: bridge
