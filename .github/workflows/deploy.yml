@@ -1,6 +1,5 @@
 name: 🚀 Deploy Simple Node App to Azure VM
 
-
 on: 
   push:
     branches: [main, master]
